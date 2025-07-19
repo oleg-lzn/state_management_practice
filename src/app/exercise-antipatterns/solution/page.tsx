@@ -147,20 +147,21 @@ function TripStatus() {
     isPaid: true,
     isConfirmed: true,
   });
-  const [status, setStatus] = useState('');
 
-  useEffect(() => {
+
+  const getStatus = () => {
     const today = new Date();
     const start = new Date(trip.startDate);
     const end = new Date(trip.endDate);
+    if (!trip.isPaid) return 'Payment Pending';
+    if (!trip.isConfirmed) return 'Awaiting Confirmation';
+    if (today < start) return 'Upcoming';
+    if (today >= start && today <= end) return 'In Progress';
+    return 'Completed';
+  };
 
-    if (!trip.isPaid) setStatus('Payment Pending');
-    else if (!trip.isConfirmed) setStatus('Awaiting Confirmation');
-    else if (today < start) setStatus('Upcoming');
-    else if (today >= start && today <= end) setStatus('In Progress');
-    else setStatus('Completed');
-  }, [trip]);
-
+  const status = getStatus();
+  
   const getStatusVariant = (status: string) => {
     switch (status) {
       case 'Payment Pending':
@@ -202,15 +203,11 @@ function SearchResults() {
     { id: 3, name: 'City Hotel', price: 180, rating: 4.7 },
   ]);
   const [sortBy, setSortBy] = useState('price');
-  const [sortedResults, setSortedResults] = useState<typeof searchResults>([]);
 
-  useEffect(() => {
-    const sorted = [...searchResults].sort((a, b) => {
-      if (sortBy === 'price') return a.price - b.price;
-      return b.rating - a.rating;
-    });
-    setSortedResults(sorted);
-  }, [searchResults, sortBy]);
+  const sortedResults = [...searchResults].sort((a, b) => {
+    if (sortBy === 'price') return a.price - b.price;
+    return b.rating - a.rating;
+  });
 
   return (
     <Card>
@@ -258,7 +255,6 @@ function SearchResults() {
 // Example 6: Booking Timer
 function BookingTimer() {
   const [timeLeft, setTimeLeft] = useState(300);
-  // const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
   const timerIdRef = useRef<NodeJS.Timeout | null>(null);
 
   const startTimer = () => {
@@ -332,7 +328,6 @@ function HotelGallery() {
     'hotel-pool.jpg',
     'hotel-restaurant.jpg',
   ]);
-  // const [lastScrollPosition, setLastScrollPosition] = useState(0);
   const lastScrollPositionRef = useRef<number>(0);
 
   useEffect(() => {
@@ -382,6 +377,7 @@ function HotelGallery() {
 }
 
 // Example 8: Search Analytics
+// TODO: This problem has not been solved yet.
 function FlightSearch() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<
