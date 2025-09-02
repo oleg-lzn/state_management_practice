@@ -1,6 +1,6 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -12,16 +12,18 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Plane, Clock, MapPin } from 'lucide-react';
-import { FlightStatus, FlightStore } from './FlightStore';
+import { Flight, FlightStatus, FlightStore } from './FlightStore';
 
 const flightStore = new FlightStore();
 
 function useFlights() {
-  const flights = useSyncExternalStore(
-    flightStore.subscribe,
-    flightStore.getSnapshot,
-    flightStore.getSnapshot
-  );
+  const [flights, setFlights] = useState<Flight[]>([]);
+
+  useEffect(() => {
+    flightStore.subscribe(() => {
+      setFlights(flightStore.getSnapshot());
+    });
+  }, []);
 
   return flights;
 }
