@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { useState } from 'react';
-import { getFlightOptions } from '@/app/exerciseUtils';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { useState } from "react";
+import { getFlightOptions } from "@/app/exerciseUtils";
 
 interface FlightOption {
   id: string;
@@ -26,34 +26,34 @@ interface FlightData {
 type FlightState = FlightData &
   (
     | {
-        status: 'idle';
+        status: "idle";
       }
     | {
-        status: 'submitting';
+        status: "submitting";
         selectedFlightId: null;
       }
     | {
-        status: 'error';
+        status: "error";
       }
     | {
-        status: 'success';
+        status: "success";
         flights: FlightOption[];
       }
   );
 
 function FlightBooking() {
   const [flightState, setFlightState] = useState<FlightState>({
-    status: 'idle',
-    destination: '',
-    departure: '',
-    arrival: '',
+    status: "idle",
+    destination: "",
+    departure: "",
+    arrival: "",
     passengers: 1,
     isRoundtrip: false,
     selectedFlightId: null,
   });
 
   const selectedFlight =
-    flightState.status === 'success' && flightState.selectedFlightId
+    flightState.status === "success" && flightState.selectedFlightId
       ? flightState.flights.find((f) => f.id === flightState.selectedFlightId)
       : null;
   const totalPrice = selectedFlight
@@ -65,22 +65,22 @@ function FlightBooking() {
 
     setFlightState((prev) => ({
       ...prev,
-      status: 'submitting',
+      status: "submitting",
       selectedFlightId: null,
     }));
 
     try {
       const flights = await getFlightOptions(flightState);
 
-      setFlightState((prev) => ({ ...prev, status: 'success', flights }));
+      setFlightState((prev) => ({ ...prev, status: "success", flights }));
     } catch {
-      setFlightState((prev) => ({ ...prev, status: 'error' }));
+      setFlightState((prev) => ({ ...prev, status: "error" }));
     }
   };
 
   const handleFlightSelect = (flight: FlightOption) => {
     setFlightState((prev) =>
-      prev.status === 'success'
+      prev.status === "success"
         ? {
             ...prev,
             selectedFlightId: flight.id,
@@ -186,22 +186,22 @@ function FlightBooking() {
 
         <Button
           type="submit"
-          disabled={flightState.status === 'submitting'}
+          disabled={flightState.status === "submitting"}
           className="w-full"
         >
-          {flightState.status === 'submitting'
-            ? 'Searching...'
-            : 'Search Flights'}
+          {flightState.status === "submitting"
+            ? "Searching..."
+            : "Search Flights"}
         </Button>
       </form>
 
-      {flightState.status === 'error' && (
+      {flightState.status === "error" && (
         <div className="mt-4 p-4 bg-red-100 text-red-700 rounded">
           An error occurred while searching for flights. Please try again.
         </div>
       )}
 
-      {flightState.status === 'success' && flightState.flights.length > 0 && (
+      {flightState.status === "success" && flightState.flights.length > 0 && (
         <div className="mt-8">
           <h2 className="text-xl font-semibold mb-4">Available Flights</h2>
           <div className="space-y-4">
@@ -210,8 +210,8 @@ function FlightBooking() {
                 key={flight.id}
                 className={`p-4 border rounded hover:shadow-md ${
                   selectedFlight?.id === flight.id
-                    ? 'border-blue-500 bg-blue-50'
-                    : ''
+                    ? "border-blue-500 bg-blue-50"
+                    : ""
                 }`}
               >
                 <div className="flex justify-between items-center">
@@ -225,7 +225,7 @@ function FlightBooking() {
                       className="mt-2 bg-green-500 text-white px-4 py-1 rounded hover:bg-green-600"
                       onClick={() => handleFlightSelect(flight)}
                     >
-                      {selectedFlight?.id === flight.id ? 'Selected' : 'Select'}
+                      {selectedFlight?.id === flight.id ? "Selected" : "Select"}
                     </Button>
                   </div>
                 </div>

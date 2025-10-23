@@ -1,22 +1,39 @@
 # Entity relationship
 
-- Destinations
-  - id
-- Homes
-  - id
-  - destinationId
-- User
-  - Name
-  - Id
+- destinations
+  - id integer [primary key]
+  - userId string
+- homes
+  - id integer [primary key]
+  - title varchar
+  - body text
+  - createdAt timestamp
+  - destinationId integer
+- users
+
+  - id integer [primary key]
+  - name varchar
+  - createdAt timestamp
+
+  Ref homes.destination.id > destination.id // one destination - many homes
+  Ref destinations.userId > users.id // one user - many directions
 
 # Sequence diagram
 
-UI -> AirBnB search service: Find search results for this query (where, check in, checkout, and # of guests)
-AirBnB search service -> UI: Results
-UI -> UI: Select home
-UI -> AirBnB API: Booking
-AirBnB API -> UI: Payment information
-UI -> Payment processor:
+User/UI -> Search Service: Search destinations (location, dates, guests)
+Search Service -> AirBnB API: Request available destinations
+AirBnB API -> Search Service: Return destinations list
+Search Service -> UI: Display destination options
+
+User/UI -> Search Service: Select destination
+Search Service -> AirBnB API: Get available homes for destination
+AirBnB API -> Search Service: Return list of homes
+Search Service -> UI: Display homes list
+
+User/UI -> AirBnB API: Select home & initiate booking
+AirBnB API -> Payment Processor: Process payment
+Payment Processor -> AirBnB API: Payment success
+AirBnB API -> UI: Booking confirmed
 
 # State diagram
 
