@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { createContext, use, useEffect, useReducer } from 'react';
+import { Button } from "@/components/ui/button";
+import { createContext, use, useEffect, useReducer } from "react";
 
 const FlowContext = createContext<{
   state: FlowState;
@@ -19,7 +19,7 @@ function SearchView() {
   return (
     <div>
       <h1>Search for stuff</h1>
-      <Button onClick={() => dispatch({ type: 'search' })}>Search</Button>
+      <Button onClick={() => dispatch({ type: "search" })}>Search</Button>
     </div>
   );
 }
@@ -27,7 +27,7 @@ function SearchView() {
 function ResultsView() {
   const { state, dispatch } = use(FlowContext);
 
-  if (state.status !== 'results') {
+  if (state.status !== "results") {
     // hopefully we never get here
     return <div>Error: something went wrong</div>;
   }
@@ -38,7 +38,7 @@ function ResultsView() {
       {state.results.map((result) => (
         <div key={result}>{result}</div>
       ))}
-      <Button onClick={() => dispatch({ type: 'back' })}>Back</Button>
+      <Button onClick={() => dispatch({ type: "back" })}>Back</Button>
     </div>
   );
 }
@@ -55,51 +55,51 @@ type FlowState = {
   results: string[] | undefined;
 } & (
   | {
-      status: 'search';
+      status: "search";
     }
   | {
-      status: 'loading';
+      status: "loading";
     }
   | {
-      status: 'results';
+      status: "results";
       results: string[];
     }
 );
 
 type FlowAction =
   | {
-      type: 'search';
+      type: "search";
     }
   | {
-      type: 'receivedResults';
+      type: "receivedResults";
       results: string[];
     }
   | {
-      type: 'back';
+      type: "back";
     };
 
 function flowReducer(state: FlowState, action: FlowAction): FlowState {
   switch (action.type) {
-    case 'search':
+    case "search":
       return {
         ...state,
-        status: 'loading',
+        status: "loading",
       };
-    case 'receivedResults':
+    case "receivedResults":
       return {
         ...state,
-        status: 'results',
+        status: "results",
         results: action.results,
       };
-    case 'back':
-      if (state.status === 'search') {
+    case "back":
+      if (state.status === "search") {
         return state;
       }
 
       // state is 'results'
       return {
         ...state,
-        status: 'search',
+        status: "search",
       };
     default:
       return state;
@@ -108,16 +108,16 @@ function flowReducer(state: FlowState, action: FlowAction): FlowState {
 
 function FlowProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(flowReducer, {
-    status: 'search',
+    status: "search",
     results: undefined,
   });
 
   useEffect(() => {
-    if (state.status === 'loading') {
+    if (state.status === "loading") {
       const id = setTimeout(() => {
         dispatch({
-          type: 'receivedResults',
-          results: ['result 1', 'result 2'],
+          type: "receivedResults",
+          results: ["result 1", "result 2"],
         });
       }, 1000);
 
@@ -137,9 +137,9 @@ function FlowContent() {
 
   return (
     <div>
-      {state.status === 'search' && <SearchView />}
-      {state.status === 'loading' && <LoadingView />}
-      {state.status === 'results' && <ResultsView />}
+      {state.status === "search" && <SearchView />}
+      {state.status === "loading" && <LoadingView />}
+      {state.status === "results" && <ResultsView />}
     </div>
   );
 }

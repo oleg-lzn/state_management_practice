@@ -177,7 +177,7 @@ const bookingStore = createStore({
 
 // Components
 function FlightBookingForm() {
-  const flightSearch = useSelector(
+  const flight тSearch = useSelector(
     bookingStore,
     (state) => state.context.flightSearch
   );
