@@ -1,17 +1,17 @@
-'use client';
+"use client";
 
-import { useReducer, useRef } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { useReducer, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
   CardAction,
-} from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Trash2, Plus, MapPin, CheckSquare } from 'lucide-react';
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Trash2, Plus, MapPin, CheckSquare } from "lucide-react";
 
 // Types
 interface TodoItem {
@@ -31,11 +31,11 @@ interface ItineraryState {
 
 // Action types
 type Action =
-  | { type: 'ADD_DESTINATION' }
-  | { type: 'UPDATE_DESTINATION'; destinationId: string; name: string }
-  | { type: 'DELETE_DESTINATION'; destinationId: string }
-  | { type: 'ADD_TODO'; destinationId: string; text: string }
-  | { type: 'DELETE_TODO'; destinationId: string; todoId: string };
+  | { type: "ADD_DESTINATION" }
+  | { type: "UPDATE_DESTINATION"; destinationId: string; name: string }
+  | { type: "DELETE_DESTINATION"; destinationId: string }
+  | { type: "ADD_TODO"; destinationId: string; text: string }
+  | { type: "DELETE_TODO"; destinationId: string; todoId: string };
 
 // Reducer function
 function itineraryReducer(
@@ -43,15 +43,15 @@ function itineraryReducer(
   action: Action
 ): ItineraryState {
   switch (action.type) {
-    case 'ADD_DESTINATION':
+    case "ADD_DESTINATION":
       return {
         ...state,
         destinations: [
           ...state.destinations,
-          { id: crypto.randomUUID(), name: '', todos: [] },
+          { id: crypto.randomUUID(), name: "", todos: [] },
         ],
       };
-    case 'UPDATE_DESTINATION':
+    case "UPDATE_DESTINATION":
       return {
         ...state,
         destinations: state.destinations.map((dest) =>
@@ -60,14 +60,14 @@ function itineraryReducer(
             : dest
         ),
       };
-    case 'DELETE_DESTINATION':
+    case "DELETE_DESTINATION":
       return {
         ...state,
         destinations: state.destinations.filter(
           (dest) => dest.id !== action.destinationId
         ),
       };
-    case 'ADD_TODO':
+    case "ADD_TODO":
       return {
         ...state,
         destinations: state.destinations.map((dest) =>
@@ -82,7 +82,7 @@ function itineraryReducer(
             : dest
         ),
       };
-    case 'DELETE_TODO':
+    case "DELETE_TODO":
       return {
         ...state,
         destinations: state.destinations.map((dest) =>
@@ -106,7 +106,7 @@ export default function ItineraryPage() {
   const lastInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddDestination = () => {
-    dispatch({ type: 'ADD_DESTINATION' });
+    dispatch({ type: "ADD_DESTINATION" });
     // Focus the new input after render
     setTimeout(() => {
       lastInputRef.current?.focus();
@@ -151,7 +151,7 @@ export default function ItineraryPage() {
                         value={destination.name}
                         onChange={(e) =>
                           dispatch({
-                            type: 'UPDATE_DESTINATION',
+                            type: "UPDATE_DESTINATION",
                             destinationId: destination.id,
                             name: e.target.value,
                           })
@@ -172,7 +172,7 @@ export default function ItineraryPage() {
                       size="icon"
                       onClick={() =>
                         dispatch({
-                          type: 'DELETE_DESTINATION',
+                          type: "DELETE_DESTINATION",
                           destinationId: destination.id,
                         })
                       }
@@ -189,15 +189,15 @@ export default function ItineraryPage() {
                       e.preventDefault();
                       const form = e.target as HTMLFormElement;
                       const input = form.elements.namedItem(
-                        'todo'
+                        "todo"
                       ) as HTMLInputElement;
                       if (input.value.trim()) {
                         dispatch({
-                          type: 'ADD_TODO',
+                          type: "ADD_TODO",
                           destinationId: destination.id,
                           text: input.value.trim(),
                         });
-                        input.value = '';
+                        input.value = "";
                       }
                     }}
                     className="flex gap-2"
@@ -238,7 +238,7 @@ export default function ItineraryPage() {
                               size="sm"
                               onClick={() =>
                                 dispatch({
-                                  type: 'DELETE_TODO',
+                                  type: "DELETE_TODO",
                                   destinationId: destination.id,
                                   todoId: todo.id,
                                 })
