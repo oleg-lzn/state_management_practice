@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useRef } from "react";
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,95 +14,25 @@ import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, MapPin, CheckSquare } from "lucide-react";
 import useItineraryStore from "./store";
 
-// // Action types
-// type Action =
-//   | { type: "ADD_DESTINATION" }
-//   | { type: "UPDATE_DESTINATION"; destinationId: string; name: string }
-//   | { type: "DELETE_DESTINATION"; destinationId: string }
-//   | { type: "ADD_TODO"; destinationId: string; text: string }
-//   | { type: "DELETE_TODO"; destinationId: string; todoId: string };
-
-// // Reducer function
-// function itineraryReducer(
-//   state: ItineraryState,
-//   action: Action
-// ): ItineraryState {
-//   switch (action.type) {
-//     case "ADD_DESTINATION":
-//       return {
-//         ...state,
-//         destinations: [
-//           ...state.destinations,
-//           { id: crypto.randomUUID(), name: "", todos: [] },
-//         ],
-//       };
-//     case "UPDATE_DESTINATION":
-//       return {
-//         ...state,
-//         destinations: state.destinations.map((dest) =>
-//           dest.id === action.destinationId
-//             ? { ...dest, name: action.name }
-//             : dest
-//         ),
-//       };
-//     case "DELETE_DESTINATION":
-//       return {
-//         ...state,
-//         destinations: state.destinations.filter(
-//           (dest) => dest.id !== action.destinationId
-//         ),
-//       };
-//     case "ADD_TODO":
-//       return {
-//         ...state,
-//         destinations: state.destinations.map((dest) =>
-//           dest.id === action.destinationId
-//             ? {
-//                 ...dest,
-//                 todos: [
-//                   ...dest.todos,
-//                   { id: crypto.randomUUID(), text: action.text },
-//                 ],
-//               }
-//             : dest
-//         ),
-//       };
-//     case "DELETE_TODO":
-//       return {
-//         ...state,
-//         destinations: state.destinations.map((dest) =>
-//           dest.id === action.destinationId
-//             ? {
-//                 ...dest,
-//                 todos: dest.todos.filter((todo) => todo.id !== action.todoId),
-//               }
-//             : dest
-//         ),
-//       };
-//     default:
-//       return state;
-//   }
-// }
-
 export default function ItineraryPage() {
-  // const [state, dispatch] = useReducer(itineraryReducer, {
-  //   destinations: [],
-  // });
-
-  const { addDestination } = useItineraryStore((state) => state.addDestination);
-  const { destinations } = useItineraryStore((state) => state.destinations);
-  const { addTodo } = useItineraryStore((state) => state.addTodo);
-  const { removeTodo } = useItineraryStore((state) => state.removeTodo);
-  const { updateTodo } = useItineraryStore((state) => state.updateTodo);
-  const { removeDestination } = useItineraryStore((state) => state.removeDestination);
-  const { updateDestination } = useItineraryStore((state) => state.updateDestination);
+  const addDestination = useItineraryStore((state) => state.addDestination);
+  const addTodo = useItineraryStore((state) => state.addTodo);
+  const removeTodo = useItineraryStore((state) => state.removeTodo);
+  const removeDestination = useItineraryStore(
+    (state) => state.removeDestination
+  );
+  const updateDestination = useItineraryStore(
+    (state) => state.updateDestination
+  );
   const lastInputRef = useRef<HTMLInputElement>(null);
+
+  const todos = useItineraryStore((state) => state.todos);
+  const destinations = useItineraryStore((state) => state.destinations);
 
   const handleAddDestination = () => {
     addDestination({ id: crypto.randomUUID(), name: "" });
     // Focus the new input after render
     setTimeout(() => {
-
       lastInputRef.current?.focus();
     }, 0);
   };
@@ -146,12 +76,12 @@ export default function ItineraryPage() {
                         onChange={(e) =>
                           updateDestination(destination.id, {
                             name: e.target.value,
-                          });
+                          })
                         }
                         placeholder="Enter destination name"
                         className="text-lg font-semibold border-none px-0 focus-visible:ring-0 focus-visible:border-b-2 focus-visible:border-primary rounded-none"
                         ref={
-                          index === state.destinations.length - 1
+                          index === destinations.length - 1
                             ? lastInputRef
                             : null
                         }
@@ -162,12 +92,7 @@ export default function ItineraryPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() =>
-                        dispatch({
-                          type: "DELETE_DESTINATION",
-                          destinationId: destination.id,
-                        })
-                      }
+                      onClick={() => removeDestination(destination.id)}
                       className="text-muted-foreground hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -184,11 +109,7 @@ export default function ItineraryPage() {
                         "todo"
                       ) as HTMLInputElement;
                       if (input.value.trim()) {
-                        dispatch({
-                          type: "ADD_TODO",
-                          destinationId: destination.id,
-                          text: input.value.trim(),
-                        });
+                        addTodo(destination.id, input.value.trim());
                         input.value = "";
                       }
                     }}
@@ -201,24 +122,21 @@ export default function ItineraryPage() {
                       className="flex-1"
                     />
                     <Button type="submit" size="sm">
-                      <Plus className="h-4 w-4" />
-                      Add
+                      <Plus className="h-4 w-4" /> Add
                     </Button>
                   </form>
 
-                  {destination.todos.length > 0 ? (
+                  {todos.length > 0 ? (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckSquare className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">
                           Things to do
                         </span>
-                        <Badge variant="secondary">
-                          {destination.todos.length}
-                        </Badge>
+                        <Badge variant="secondary">{todos.length}</Badge>
                       </div>
                       <ul className="space-y-2">
-                        {destination.todos.map((todo) => (
+                        {todos.map((todo) => (
                           <li
                             key={todo.id}
                             className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 transition-colors"
@@ -228,13 +146,7 @@ export default function ItineraryPage() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() =>
-                                dispatch({
-                                  type: "DELETE_TODO",
-                                  destinationId: destination.id,
-                                  todoId: todo.id,
-                                })
-                              }
+                              onClick={() => removeTodo(todo.id)}
                               className="text-muted-foreground hover:text-destructive h-auto p-1"
                             >
                               <Trash2 className="h-3 w-3" />
