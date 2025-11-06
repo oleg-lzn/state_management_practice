@@ -1,22 +1,29 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { createContext, use, useReducer, useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { createContext, use, useReducer, useEffect, useState } from "react";
 
-import { fetchHotels } from './fetchHotels';
-import { fetchFlights } from './fetchFlights';
+import { fetchHotels } from "./fetchHotels";
+import { fetchFlights } from "./fetchFlights";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
 
 // Types
 enum Step {
-  FLIGHT_SEARCH = 'FLIGHT_SEARCH',
-  FLIGHT_RESULTS = 'FLIGHT_RESULTS',
-  HOTEL_SEARCH = 'HOTEL_SEARCH',
-  HOTEL_RESULTS = 'HOTEL_RESULTS',
-  REVIEW = 'REVIEW',
-  CONFIRMATION = 'CONFIRMATION',
+  FLIGHT_SEARCH = "FLIGHT_SEARCH",
+  FLIGHT_RESULTS = "FLIGHT_RESULTS",
+  HOTEL_SEARCH = "HOTEL_SEARCH",
+  HOTEL_RESULTS = "HOTEL_RESULTS",
+  REVIEW = "REVIEW",
+  CONFIRMATION = "CONFIRMATION",
 }
 
 export interface FlightOption {
@@ -58,26 +65,26 @@ interface BookingState {
 
 type BookingAction =
   | {
-      type: 'flightSearchUpdated';
-      payload: Partial<BookingState['flightSearch']>;
+      type: "flightSearchUpdated";
+      payload: Partial<BookingState["flightSearch"]>;
     }
   | {
-      type: 'flightSearchSubmitted';
+      type: "flightSearchSubmitted";
     }
-  | { type: 'flightSelected'; flight: FlightOption | null }
+  | { type: "flightSelected"; flight: FlightOption | null }
   | {
-      type: 'hotelSearchUpdated';
-      payload: Partial<BookingState['hotelSearch']>;
+      type: "hotelSearchUpdated";
+      payload: Partial<BookingState["hotelSearch"]>;
     }
   | {
-      type: 'hotelSearchSubmitted';
+      type: "hotelSearchSubmitted";
     }
-  | { type: 'hotelSelected'; payload: HotelOption | null }
-  | { type: 'RESET_HOTEL' }
-  | { type: 'back' }
-  | { type: 'changeFlight' }
-  | { type: 'changeHotel' }
-  | { type: 'bookingConfirmed' };
+  | { type: "hotelSelected"; payload: HotelOption | null }
+  | { type: "RESET_HOTEL" }
+  | { type: "back" }
+  | { type: "changeFlight" }
+  | { type: "changeHotel" }
+  | { type: "bookingConfirmed" };
 
 // Context
 const BookingContext = createContext<{
@@ -91,12 +98,12 @@ function bookingReducer(
   action: BookingAction
 ): BookingState {
   switch (action.type) {
-    case 'flightSearchUpdated':
+    case "flightSearchUpdated":
       return {
         ...state,
         flightSearch: { ...state.flightSearch, ...action.payload },
       };
-    case 'flightSearchSubmitted':
+    case "flightSearchSubmitted":
       return {
         ...state,
         // set hotel dates to same as flight dates
@@ -107,29 +114,29 @@ function bookingReducer(
         },
         currentStep: Step.FLIGHT_RESULTS,
       };
-    case 'flightSelected':
+    case "flightSelected":
       return {
         ...state,
         selectedFlight: action.flight,
         currentStep: Step.HOTEL_SEARCH,
       };
-    case 'hotelSearchUpdated':
+    case "hotelSearchUpdated":
       return {
         ...state,
         hotelSearch: { ...state.hotelSearch, ...action.payload },
       };
-    case 'hotelSearchSubmitted':
+    case "hotelSearchSubmitted":
       return {
         ...state,
         currentStep: Step.HOTEL_RESULTS,
       };
-    case 'hotelSelected':
+    case "hotelSelected":
       return {
         ...state,
         selectedHotel: action.payload,
         currentStep: Step.REVIEW,
       };
-    case 'back':
+    case "back":
       switch (state.currentStep) {
         case Step.FLIGHT_RESULTS:
           return {
@@ -149,17 +156,17 @@ function bookingReducer(
         default:
           return state;
       }
-    case 'changeFlight':
+    case "changeFlight":
       return {
         ...state,
         currentStep: Step.FLIGHT_SEARCH,
       };
-    case 'changeHotel':
+    case "changeHotel":
       return {
         ...state,
         currentStep: Step.HOTEL_SEARCH,
       };
-    case 'bookingConfirmed':
+    case "bookingConfirmed":
       return {
         ...state,
         currentStep: Step.CONFIRMATION,
@@ -177,7 +184,7 @@ function FlightBookingForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch({ type: 'flightSearchSubmitted' });
+    dispatch({ type: "flightSearchSubmitted" });
   };
 
   return (
@@ -188,7 +195,7 @@ function FlightBookingForm() {
           checked={flightSearch.isOneWay}
           onCheckedChange={(checked) =>
             dispatch({
-              type: 'flightSearchUpdated',
+              type: "flightSearchUpdated",
               payload: { isOneWay: checked },
             })
           }
@@ -204,7 +211,7 @@ function FlightBookingForm() {
           value={flightSearch.destination}
           onChange={(e) =>
             dispatch({
-              type: 'flightSearchUpdated',
+              type: "flightSearchUpdated",
               payload: { destination: e.target.value },
             })
           }
@@ -220,7 +227,7 @@ function FlightBookingForm() {
           value={flightSearch.departure}
           onChange={(e) =>
             dispatch({
-              type: 'flightSearchUpdated',
+              type: "flightSearchUpdated",
               payload: { departure: e.target.value },
             })
           }
@@ -237,7 +244,7 @@ function FlightBookingForm() {
             value={flightSearch.arrival}
             onChange={(e) =>
               dispatch({
-                type: 'flightSearchUpdated',
+                type: "flightSearchUpdated",
                 payload: { arrival: e.target.value },
               })
             }
@@ -254,7 +261,7 @@ function FlightBookingForm() {
           value={flightSearch.passengers}
           onChange={(e) =>
             dispatch({
-              type: 'flightSearchUpdated',
+              type: "flightSearchUpdated",
               payload: { passengers: parseInt(e.target.value) },
             })
           }
@@ -275,31 +282,17 @@ function FlightSearchResults() {
   const { state, dispatch } = use(BookingContext)!;
   const { selectedFlight, flightSearch } = state;
 
-  const [flights, setFlights] = useState<FlightOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadFlights = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const flightData = await fetchFlights(flightSearch);
-        setFlights(flightData);
-      } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to fetch flights'
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadFlights();
-  }, [flightSearch]);
+  const {
+    data: flights,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["flights", flightSearch],
+    queryFn: () => fetchFlights(flightSearch),
+  });
 
   const handleSelectFlight = (flight: FlightOption) => {
-    dispatch({ type: 'flightSelected', flight: flight });
+    dispatch({ type: "flightSelected", flight: flight });
   };
 
   if (isLoading) {
@@ -313,7 +306,7 @@ function FlightSearchResults() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-48">
-        <div className="text-red-500">Error: {error}</div>
+        <div className="text-red-500">Error: {error.message}</div>
       </div>
     );
   }
@@ -322,7 +315,7 @@ function FlightSearchResults() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Available Flights</h2>
-        <Button variant="outline" onClick={() => dispatch({ type: 'back' })}>
+        <Button variant="outline" onClick={() => dispatch({ type: "back" })}>
           Back to Search
         </Button>
       </div>
@@ -333,8 +326,8 @@ function FlightSearchResults() {
             key={flight.id}
             className={`p-4 border rounded hover:shadow-md ${
               selectedFlight?.id === flight.id
-                ? 'border-blue-500 bg-blue-50'
-                : ''
+                ? "border-blue-500 bg-blue-50"
+                : ""
             }`}
           >
             <div className="flex justify-between items-center">
@@ -365,7 +358,7 @@ function HotelBookingForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    dispatch({ type: 'hotelSearchSubmitted' });
+    dispatch({ type: "hotelSearchSubmitted" });
   };
 
   return (
@@ -379,7 +372,7 @@ function HotelBookingForm() {
           value={hotelSearch.checkIn}
           onChange={(e) =>
             dispatch({
-              type: 'hotelSearchUpdated',
+              type: "hotelSearchUpdated",
               payload: { checkIn: e.target.value },
             })
           }
@@ -395,7 +388,7 @@ function HotelBookingForm() {
           value={hotelSearch.checkOut}
           onChange={(e) =>
             dispatch({
-              type: 'hotelSearchUpdated',
+              type: "hotelSearchUpdated",
               payload: { checkOut: e.target.value },
             })
           }
@@ -411,7 +404,7 @@ function HotelBookingForm() {
           value={hotelSearch.guests}
           onChange={(e) =>
             dispatch({
-              type: 'hotelSearchUpdated',
+              type: "hotelSearchUpdated",
               payload: { guests: parseInt(e.target.value) },
             })
           }
@@ -428,7 +421,7 @@ function HotelBookingForm() {
           value={hotelSearch.roomType}
           onChange={(e) =>
             dispatch({
-              type: 'hotelSearchUpdated',
+              type: "hotelSearchUpdated",
               payload: { roomType: e.target.value },
             })
           }
@@ -452,29 +445,17 @@ function HotelSearchResults() {
   const { state, dispatch } = use(BookingContext)!;
   const { selectedHotel, hotelSearch } = state;
 
-  const [hotels, setHotels] = useState<HotelOption[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadHotels = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const hotelData = await fetchHotels(hotelSearch);
-        setHotels(hotelData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch hotels');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadHotels();
-  }, [hotelSearch]);
+  const {
+    data: hotels,
+    error,
+    isLoading,
+  } = useQuery({
+    queryKey: ["hotels", hotelSearch],
+    queryFn: () => fetchHotels(hotelSearch),
+  });
 
   const handleSelectHotel = (hotel: HotelOption) => {
-    dispatch({ type: 'hotelSelected', payload: hotel });
+    dispatch({ type: "hotelSelected", payload: hotel });
   };
 
   if (isLoading) {
@@ -497,7 +478,7 @@ function HotelSearchResults() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold">Available Hotels</h2>
-        <Button variant="outline" onClick={() => dispatch({ type: 'back' })}>
+        <Button variant="outline" onClick={() => dispatch({ type: "back" })}>
           Back to Search
         </Button>
       </div>
@@ -507,7 +488,7 @@ function HotelSearchResults() {
           <div
             key={hotel.id}
             className={`p-4 border rounded hover:shadow-md ${
-              selectedHotel?.id === hotel.id ? 'border-blue-500 bg-blue-50' : ''
+              selectedHotel?.id === hotel.id ? "border-blue-500 bg-blue-50" : ""
             }`}
           >
             <div className="flex justify-between items-center">
@@ -515,7 +496,7 @@ function HotelSearchResults() {
                 <h3 className="font-medium">{hotel.name}</h3>
                 <p className="text-gray-600">Rating: {hotel.rating}/5</p>
                 <p className="text-sm text-gray-500">
-                  {hotel.amenities.join(', ')}
+                  {hotel.amenities.join(", ")}
                 </p>
               </div>
               <div className="text-right">
@@ -540,11 +521,11 @@ function BookingReview() {
   const { selectedFlight, selectedHotel, flightSearch, hotelSearch } = state;
 
   const handleConfirm = () => {
-    dispatch({ type: 'bookingConfirmed' });
+    dispatch({ type: "bookingConfirmed" });
   };
 
   const handleBack = () => {
-    dispatch({ type: 'back' });
+    dispatch({ type: "back" });
   };
 
   return (
@@ -562,7 +543,7 @@ function BookingReview() {
             variant="outline"
             className="mt-2"
             onClick={() => {
-              dispatch({ type: 'changeFlight' });
+              dispatch({ type: "changeFlight" });
             }}
           >
             Change Flight
@@ -579,7 +560,7 @@ function BookingReview() {
           <Button
             variant="outline"
             className="mt-2"
-            onClick={() => dispatch({ type: 'changeHotel' })}
+            onClick={() => dispatch({ type: "changeHotel" })}
           >
             Change Hotel
           </Button>
@@ -629,18 +610,18 @@ function BookingFlow() {
   const initialState: BookingState = {
     currentStep: Step.FLIGHT_SEARCH,
     flightSearch: {
-      destination: '',
-      departure: '',
-      arrival: '',
+      destination: "",
+      departure: "",
+      arrival: "",
       passengers: 1,
       isOneWay: false,
     },
     selectedFlight: null,
     hotelSearch: {
-      checkIn: '',
-      checkOut: '',
+      checkIn: "",
+      checkOut: "",
       guests: 1,
-      roomType: 'standard',
+      roomType: "standard",
     },
     selectedHotel: null,
   };
@@ -677,5 +658,12 @@ function BookingFlow() {
 }
 
 export default function Page() {
-  return <BookingFlow />;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BookingFlow />
+    </QueryClientProvider>
+  );
+}
+function dispatch(arg0: { type: string; flight: FlightOption }) {
+  throw new Error("Function not implemented.");
 }
